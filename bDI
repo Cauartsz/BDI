@@ -1,0 +1,953 @@
+-- Comando SQL: DQL SELECT
+
+-- MySQL Workbench Forward Engineering
+
+SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0;
+SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0;
+SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION';
+
+-- -----------------------------------------------------
+-- Schema mydb
+-- -----------------------------------------------------
+-- -----------------------------------------------------
+-- Schema FarmaciaTADS036M
+-- -----------------------------------------------------
+
+-- -----------------------------------------------------
+-- Schema FarmaciaTADS036M
+-- -----------------------------------------------------
+CREATE SCHEMA IF NOT EXISTS `FarmaciaTADS036M` DEFAULT CHARACTER SET utf8mb3 ;
+USE `FarmaciaTADS036M` ;
+
+-- -----------------------------------------------------
+-- Table `FarmaciaTADS036M`.`Cargo`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `FarmaciaTADS036M`.`Cargo` (
+  `cbo` INT(11) NOT NULL,
+  `nome` VARCHAR(45) NOT NULL,
+  `faixaSalario` DECIMAL(7,2) UNSIGNED ZEROFILL NOT NULL,
+  PRIMARY KEY (`cbo`))
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8mb3;
+
+
+-- -----------------------------------------------------
+-- Table `FarmaciaTADS036M`.`Cliente`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `FarmaciaTADS036M`.`Cliente` (
+  `cpf` VARCHAR(14) NOT NULL,
+  `nome` VARCHAR(45) NOT NULL,
+  `sexo` CHAR(1) NOT NULL,
+  `email` VARCHAR(45) NULL DEFAULT NULL,
+  `telefone` VARCHAR(15) NOT NULL,
+  `dataNasc` DATE NULL DEFAULT NULL,
+  PRIMARY KEY (`cpf`),
+  UNIQUE INDEX `email_UNIQUE` (`email` ASC) VISIBLE,
+  UNIQUE INDEX `telefone_UNIQUE` (`telefone` ASC) VISIBLE)
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8mb3;
+
+
+-- -----------------------------------------------------
+-- Table `FarmaciaTADS036M`.`Fornecedor`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `FarmaciaTADS036M`.`Fornecedor` (
+  `cnpj` VARCHAR(18) NOT NULL,
+  `nome` VARCHAR(45) NOT NULL,
+  `email` VARCHAR(45) NOT NULL,
+  PRIMARY KEY (`cnpj`),
+  UNIQUE INDEX `email_UNIQUE` (`email` ASC) VISIBLE)
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8mb3;
+
+
+-- -----------------------------------------------------
+-- Table `FarmaciaTADS036M`.`Compras`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `FarmaciaTADS036M`.`Compras` (
+  `idCompras` INT(11) NOT NULL AUTO_INCREMENT,
+  `cupomFiscal` VARCHAR(45) NOT NULL,
+  `dataComp` DATETIME NOT NULL,
+  `dataVenc` DATETIME NOT NULL,
+  `dataPag` DATETIME NULL DEFAULT NULL,
+  `dataEntrega` DATETIME NULL DEFAULT NULL,
+  `desconto` DECIMAL(4,2) NULL DEFAULT NULL,
+  `valorFrete` DECIMAL(5,2) NULL DEFAULT NULL,
+  `Fornecedor_cnpj` VARCHAR(18) NOT NULL,
+  PRIMARY KEY (`idCompras`),
+  INDEX `fk_Compras_Fornecedor1_idx` (`Fornecedor_cnpj` ASC) VISIBLE,
+  CONSTRAINT `fk_Compras_Fornecedor1`
+    FOREIGN KEY (`Fornecedor_cnpj`)
+    REFERENCES `FarmaciaTADS036M`.`Fornecedor` (`cnpj`)
+    ON DELETE NO ACTION
+    ON UPDATE CASCADE)
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8mb3;
+
+
+-- -----------------------------------------------------
+-- Table `FarmaciaTADS036M`.`Funcionario`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `FarmaciaTADS036M`.`Funcionario` (
+  `cpf` VARCHAR(14) NOT NULL,
+  `nome` VARCHAR(60) NOT NULL,
+  `nomeSocial` VARCHAR(45) NULL,
+  `email` VARCHAR(45) NOT NULL,
+  `sexo` CHAR(1) NOT NULL,
+  `estadoCivil` VARCHAR(15) NOT NULL,
+  `dataNasc` DATE NOT NULL,
+  `ch` INT NOT NULL,
+  `salario` DECIMAL(7,2) UNSIGNED ZEROFILL NOT NULL,
+  `comissao` DECIMAL(6,2) UNSIGNED ZEROFILL NULL DEFAULT NULL,
+  `dataAdm` DATETIME NOT NULL,
+  `dataDem` DATETIME NULL DEFAULT NULL,
+  `fg` DECIMAL(6,2) UNSIGNED ZEROFILL NULL,
+  UNIQUE INDEX `email_UNIQUE` (`email` ASC) VISIBLE,
+  PRIMARY KEY (`cpf`))
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8mb3;
+
+
+-- -----------------------------------------------------
+-- Table `FarmaciaTADS036M`.`Departamento`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `FarmaciaTADS036M`.`Departamento` (
+  `idDepartamento` INT(11) NOT NULL AUTO_INCREMENT,
+  `nome` VARCHAR(45) NOT NULL,
+  `local` VARCHAR(45) NOT NULL,
+  `email` VARCHAR(45) NOT NULL,
+  `Gerente_cpf` VARCHAR(14) NULL DEFAULT NULL,
+  PRIMARY KEY (`idDepartamento`),
+  UNIQUE INDEX `email_UNIQUE` (`email` ASC) VISIBLE,
+  INDEX `fk_Departamento_Funcionario1_idx` (`Gerente_cpf` ASC) VISIBLE,
+  CONSTRAINT `fk_Departamento_Funcionario1`
+    FOREIGN KEY (`Gerente_cpf`)
+    REFERENCES `FarmaciaTADS036M`.`Funcionario` (`cpf`)
+    ON DELETE NO ACTION
+    ON UPDATE CASCADE)
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8mb3;
+
+
+-- -----------------------------------------------------
+-- Table `FarmaciaTADS036M`.`Dependente`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `FarmaciaTADS036M`.`Dependente` (
+  `cpf` VARCHAR(14) NOT NULL,
+  `nome` VARCHAR(60) NOT NULL,
+  `parentesco` VARCHAR(15) NOT NULL,
+  `dataNasc` DATE NOT NULL,
+  `Funcionario_cpf` VARCHAR(14) NOT NULL,
+  PRIMARY KEY (`cpf`),
+  INDEX `fk_Dependente_Funcionario1_idx` (`Funcionario_cpf` ASC) VISIBLE,
+  CONSTRAINT `fk_Dependente_Funcionario1`
+    FOREIGN KEY (`Funcionario_cpf`)
+    REFERENCES `FarmaciaTADS036M`.`Funcionario` (`cpf`)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE)
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8mb3;
+
+
+-- -----------------------------------------------------
+-- Table `FarmaciaTADS036M`.`Despesa`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `FarmaciaTADS036M`.`Despesa` (
+  `idDespesa` INT(11) NOT NULL AUTO_INCREMENT,
+  `nome` VARCHAR(45) NOT NULL,
+  `valor` DECIMAL(6,2) UNSIGNED ZEROFILL NOT NULL,
+  `dataVenc` DATETIME NOT NULL,
+  `dataPag` DATETIME NULL DEFAULT NULL,
+  `juros` DECIMAL(5,2) UNSIGNED ZEROFILL NULL DEFAULT NULL,
+  `Compras_idCompras` INT(11) NULL DEFAULT NULL,
+  PRIMARY KEY (`idDespesa`),
+  INDEX `fk_Despesa_Compras1_idx` (`Compras_idCompras` ASC) VISIBLE,
+  CONSTRAINT `fk_Despesa_Compras1`
+    FOREIGN KEY (`Compras_idCompras`)
+    REFERENCES `FarmaciaTADS036M`.`Compras` (`idCompras`)
+    ON DELETE CASCADE
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8mb3;
+
+
+-- -----------------------------------------------------
+-- Table `FarmaciaTADS036M`.`EnderecoCli`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `FarmaciaTADS036M`.`EnderecoCli` (
+  `Cliente_cpf` VARCHAR(14) NOT NULL,
+  `uf` CHAR(2) NOT NULL,
+  `cidade` VARCHAR(60) NOT NULL,
+  `bairro` VARCHAR(60) NOT NULL,
+  `rua` VARCHAR(70) NOT NULL,
+  `numero` INT(11) NOT NULL,
+  `comp` VARCHAR(45) NULL DEFAULT NULL,
+  `cep` VARCHAR(9) NOT NULL,
+  PRIMARY KEY (`Cliente_cpf`),
+  CONSTRAINT `fk_EnderecoCli_Cliente1`
+    FOREIGN KEY (`Cliente_cpf`)
+    REFERENCES `FarmaciaTADS036M`.`Cliente` (`cpf`)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE)
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8mb3;
+
+
+-- -----------------------------------------------------
+-- Table `FarmaciaTADS036M`.`EnderecoFunc`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `FarmaciaTADS036M`.`EnderecoFunc` (
+  `Funcionario_cpf` VARCHAR(14) NOT NULL,
+  `uf` CHAR(2) NOT NULL,
+  `cidade` VARCHAR(60) NOT NULL,
+  `bairro` VARCHAR(60) NOT NULL,
+  `rua` VARCHAR(70) NOT NULL,
+  `numero` INT(11) NOT NULL,
+  `comp` VARCHAR(45) NULL,
+  `cep` VARCHAR(9) NOT NULL,
+  INDEX `fk_EnderecoFunc_Funcionario1_idx` (`Funcionario_cpf` ASC) VISIBLE,
+  PRIMARY KEY (`Funcionario_cpf`),
+  CONSTRAINT `fk_EnderecoFunc_Funcionario1`
+    FOREIGN KEY (`Funcionario_cpf`)
+    REFERENCES `FarmaciaTADS036M`.`Funcionario` (`cpf`)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE)
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8mb3;
+
+
+-- -----------------------------------------------------
+-- Table `FarmaciaTADS036M`.`Ferias`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `FarmaciaTADS036M`.`Ferias` (
+  `idFerias` INT(11) NOT NULL AUTO_INCREMENT,
+  `dataInicio` DATE NOT NULL,
+  `dataFim` DATE NOT NULL,
+  `qtdDias` INT(11) NOT NULL,
+  `anoRef` YEAR(4) NOT NULL,
+  `Funcionario_cpf` VARCHAR(14) NOT NULL,
+  PRIMARY KEY (`idFerias`),
+  INDEX `fk_Ferias_Funcionario1_idx` (`Funcionario_cpf` ASC) VISIBLE,
+  CONSTRAINT `fk_Ferias_Funcionario1`
+    FOREIGN KEY (`Funcionario_cpf`)
+    REFERENCES `FarmaciaTADS036M`.`Funcionario` (`cpf`)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE)
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8mb3;
+
+
+-- -----------------------------------------------------
+-- Table `FarmaciaTADS036M`.`Venda`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `FarmaciaTADS036M`.`Venda` (
+  `idVenda` INT(11) NOT NULL AUTO_INCREMENT,
+  `dataVenda` DATETIME NOT NULL,
+  `valorTotal` DECIMAL(6,2) UNSIGNED ZEROFILL NOT NULL,
+  `desconto` DECIMAL(4,2) NULL DEFAULT NULL,
+  `Funcionario_cpf` VARCHAR(14) NOT NULL,
+  `Cliente_cpf` VARCHAR(14) NOT NULL,
+  PRIMARY KEY (`idVenda`),
+  INDEX `fk_Venda_Funcionario1_idx` (`Funcionario_cpf` ASC) VISIBLE,
+  INDEX `fk_Venda_Cliente1_idx` (`Cliente_cpf` ASC) VISIBLE,
+  CONSTRAINT `fk_Venda_Cliente1`
+    FOREIGN KEY (`Cliente_cpf`)
+    REFERENCES `FarmaciaTADS036M`.`Cliente` (`cpf`)
+    ON DELETE NO ACTION
+    ON UPDATE CASCADE,
+  CONSTRAINT `fk_Venda_Funcionario1`
+    FOREIGN KEY (`Funcionario_cpf`)
+    REFERENCES `FarmaciaTADS036M`.`Funcionario` (`cpf`)
+    ON DELETE NO ACTION
+    ON UPDATE CASCADE)
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8mb3;
+
+
+-- -----------------------------------------------------
+-- Table `FarmaciaTADS036M`.`FormaPag`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `FarmaciaTADS036M`.`FormaPag` (
+  `idFormaPag` INT(11) NOT NULL AUTO_INCREMENT,
+  `valorPago` DECIMAL(6,2) UNSIGNED ZEROFILL NOT NULL,
+  `tipo` VARCHAR(45) NOT NULL,
+  `parcela` INT(11) NULL,
+  `Venda_idVenda` INT(11) NOT NULL,
+  PRIMARY KEY (`idFormaPag`),
+  INDEX `fk_FormaPag_Venda1_idx` (`Venda_idVenda` ASC) VISIBLE,
+  CONSTRAINT `fk_FormaPag_Venda1`
+    FOREIGN KEY (`Venda_idVenda`)
+    REFERENCES `FarmaciaTADS036M`.`Venda` (`idVenda`)
+    ON DELETE CASCADE
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8mb3;
+
+
+-- -----------------------------------------------------
+-- Table `FarmaciaTADS036M`.`Produto`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `FarmaciaTADS036M`.`Produto` (
+  `idProduto` INT(11) NOT NULL AUTO_INCREMENT,
+  `nome` VARCHAR(45) NOT NULL,
+  `valor` DECIMAL(6,2) UNSIGNED ZEROFILL NOT NULL,
+  `quantidade` INT(11) NOT NULL,
+  `dataValidade` DATE NOT NULL,
+  `lote` VARCHAR(45) NOT NULL,
+  PRIMARY KEY (`idProduto`))
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8mb3;
+
+
+-- -----------------------------------------------------
+-- Table `FarmaciaTADS036M`.`ItensCompra`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `FarmaciaTADS036M`.`ItensCompra` (
+  `Produto_idProduto` INT(11) NOT NULL,
+  `Compras_idCompras` INT(11) NOT NULL,
+  `quantidade` INT(11) NOT NULL,
+  `valorComp` DECIMAL(6,2) UNSIGNED ZEROFILL NOT NULL,
+  PRIMARY KEY (`Produto_idProduto`, `Compras_idCompras`),
+  INDEX `fk_Produto_has_Compras_Compras1_idx` (`Compras_idCompras` ASC) VISIBLE,
+  INDEX `fk_Produto_has_Compras_Produto1_idx` (`Produto_idProduto` ASC) VISIBLE,
+  CONSTRAINT `fk_Produto_has_Compras_Compras1`
+    FOREIGN KEY (`Compras_idCompras`)
+    REFERENCES `FarmaciaTADS036M`.`Compras` (`idCompras`)
+    ON DELETE CASCADE
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_Produto_has_Compras_Produto1`
+    FOREIGN KEY (`Produto_idProduto`)
+    REFERENCES `FarmaciaTADS036M`.`Produto` (`idProduto`)
+    ON DELETE CASCADE
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8mb3;
+
+
+-- -----------------------------------------------------
+-- Table `FarmaciaTADS036M`.`ItensVendaProd`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `FarmaciaTADS036M`.`ItensVendaProd` (
+  `Venda_idVenda` INT(11) NOT NULL,
+  `Produto_idProduto` INT(11) NOT NULL,
+  `valorDeVenda` DECIMAL(6,2) NOT NULL,
+  `quantidade` INT(11) NOT NULL,
+  `descontoProd` DECIMAL(4,2) NULL DEFAULT NULL,
+  PRIMARY KEY (`Venda_idVenda`, `Produto_idProduto`),
+  INDEX `fk_Venda_has_Produto_Produto1_idx` (`Produto_idProduto` ASC) VISIBLE,
+  INDEX `fk_Venda_has_Produto_Venda1_idx` (`Venda_idVenda` ASC) VISIBLE,
+  CONSTRAINT `fk_Venda_has_Produto_Produto1`
+    FOREIGN KEY (`Produto_idProduto`)
+    REFERENCES `FarmaciaTADS036M`.`Produto` (`idProduto`)
+    ON DELETE CASCADE
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_Venda_has_Produto_Venda1`
+    FOREIGN KEY (`Venda_idVenda`)
+    REFERENCES `FarmaciaTADS036M`.`Venda` (`idVenda`)
+    ON DELETE CASCADE
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8mb3;
+
+
+-- -----------------------------------------------------
+-- Table `FarmaciaTADS036M`.`Servico`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `FarmaciaTADS036M`.`Servico` (
+  `idServico` INT(11) NOT NULL AUTO_INCREMENT,
+  `nome` VARCHAR(45) NOT NULL,
+  `valor` DECIMAL(6,2) UNSIGNED ZEROFILL NOT NULL,
+  PRIMARY KEY (`idServico`))
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8mb3;
+
+
+-- -----------------------------------------------------
+-- Table `FarmaciaTADS036M`.`ItensVendaServico`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `FarmaciaTADS036M`.`ItensVendaServico` (
+  `Funcionario_cpf` VARCHAR(14) NOT NULL,
+  `Venda_idVenda` INT(11) NOT NULL,
+  `Servico_idServico` INT(11) NOT NULL,
+  `valorVenda` DECIMAL(6,2) UNSIGNED ZEROFILL NOT NULL,
+  `quantidade` INT(11) NOT NULL,
+  `desconto` DECIMAL(4,2) NULL DEFAULT NULL,
+  PRIMARY KEY (`Funcionario_cpf`, `Venda_idVenda`, `Servico_idServico`),
+  INDEX `fk_ItensVendaServico_Venda1_idx` (`Venda_idVenda` ASC) VISIBLE,
+  INDEX `fk_ItensVendaServico_Servico1_idx` (`Servico_idServico` ASC) VISIBLE,
+  CONSTRAINT `fk_ItensVendaServico_Funcionario1`
+    FOREIGN KEY (`Funcionario_cpf`)
+    REFERENCES `FarmaciaTADS036M`.`Funcionario` (`cpf`)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE,
+  CONSTRAINT `fk_ItensVendaServico_Servico1`
+    FOREIGN KEY (`Servico_idServico`)
+    REFERENCES `FarmaciaTADS036M`.`Servico` (`idServico`)
+    ON DELETE CASCADE
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_ItensVendaServico_Venda1`
+    FOREIGN KEY (`Venda_idVenda`)
+    REFERENCES `FarmaciaTADS036M`.`Venda` (`idVenda`)
+    ON DELETE CASCADE
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8mb3;
+
+
+-- -----------------------------------------------------
+-- Table `FarmaciaTADS036M`.`PlanoSaude`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `FarmaciaTADS036M`.`PlanoSaude` (
+  `Cliente_cpf` VARCHAR(14) NOT NULL,
+  `numero` VARCHAR(45) NOT NULL,
+  `nome` VARCHAR(45) NOT NULL,
+  INDEX `fk_PlanoSaude_Cliente1_idx` (`Cliente_cpf` ASC) VISIBLE,
+  PRIMARY KEY (`Cliente_cpf`),
+  CONSTRAINT `fk_PlanoSaude_Cliente1`
+    FOREIGN KEY (`Cliente_cpf`)
+    REFERENCES `FarmaciaTADS036M`.`Cliente` (`cpf`)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE)
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8mb3;
+
+
+-- -----------------------------------------------------
+-- Table `FarmaciaTADS036M`.`ReceitasMedica`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `FarmaciaTADS036M`.`ReceitasMedica` (
+  `idReceitas` INT(11) NOT NULL,
+  `descricao` VARCHAR(140) NOT NULL,
+  `arquivoReceita` BLOB NULL DEFAULT NULL,
+  `Venda_idVenda` INT(11) NOT NULL,
+  PRIMARY KEY (`idReceitas`),
+  INDEX `fk_ReceitasMedica_Venda1_idx` (`Venda_idVenda` ASC) VISIBLE,
+  CONSTRAINT `fk_ReceitasMedica_Venda1`
+    FOREIGN KEY (`Venda_idVenda`)
+    REFERENCES `FarmaciaTADS036M`.`Venda` (`idVenda`)
+    ON DELETE CASCADE
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8mb3;
+
+
+-- -----------------------------------------------------
+-- Table `FarmaciaTADS036M`.`Telefone`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `FarmaciaTADS036M`.`Telefone` (
+  `idTelefone` INT(11) NOT NULL AUTO_INCREMENT,
+  `numero` VARCHAR(15) NOT NULL,
+  `Funcionario_cpf` VARCHAR(14) NULL DEFAULT NULL,
+  `Departamento_idDepartamento` INT(11) NULL DEFAULT NULL,
+  `Fornecedor_cnpj` VARCHAR(18) NULL DEFAULT NULL,
+  PRIMARY KEY (`idTelefone`),
+  INDEX `fk_Telefone_Funcionario1_idx` (`Funcionario_cpf` ASC) VISIBLE,
+  INDEX `fk_Telefone_Departamento1_idx` (`Departamento_idDepartamento` ASC) VISIBLE,
+  INDEX `fk_Telefone_Fornecedor1_idx` (`Fornecedor_cnpj` ASC) VISIBLE,
+  UNIQUE INDEX `numero_UNIQUE` (`numero` ASC) VISIBLE,
+  CONSTRAINT `fk_Telefone_Departamento1`
+    FOREIGN KEY (`Departamento_idDepartamento`)
+    REFERENCES `FarmaciaTADS036M`.`Departamento` (`idDepartamento`)
+    ON DELETE CASCADE
+    ON UPDATE NO ACTION,
+  CONSTRAINT `fk_Telefone_Fornecedor1`
+    FOREIGN KEY (`Fornecedor_cnpj`)
+    REFERENCES `FarmaciaTADS036M`.`Fornecedor` (`cnpj`)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE,
+  CONSTRAINT `fk_Telefone_Funcionario1`
+    FOREIGN KEY (`Funcionario_cpf`)
+    REFERENCES `FarmaciaTADS036M`.`Funcionario` (`cpf`)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE)
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8mb3;
+
+
+-- -----------------------------------------------------
+-- Table `FarmaciaTADS036M`.`Trabalhar`
+-- -----------------------------------------------------
+CREATE TABLE IF NOT EXISTS `FarmaciaTADS036M`.`Trabalhar` (
+  `Funcionario_cpf` VARCHAR(14) NOT NULL,
+  `Cargo_cbo` INT(11) NOT NULL,
+  `Departamento_idDepartamento` INT(11) NOT NULL,
+  PRIMARY KEY (`Funcionario_cpf`, `Cargo_cbo`, `Departamento_idDepartamento`),
+  INDEX `fk_Funcionario_has_Cargo_Cargo1_idx` (`Cargo_cbo` ASC) VISIBLE,
+  INDEX `fk_Funcionario_has_Cargo_Funcionario1_idx` (`Funcionario_cpf` ASC) VISIBLE,
+  INDEX `fk_Funcionario_has_Cargo_Departamento1_idx` (`Departamento_idDepartamento` ASC) VISIBLE,
+  CONSTRAINT `fk_Funcionario_has_Cargo_Funcionario1`
+    FOREIGN KEY (`Funcionario_cpf`)
+    REFERENCES `FarmaciaTADS036M`.`Funcionario` (`cpf`)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE,
+  CONSTRAINT `fk_Funcionario_has_Cargo_Cargo1`
+    FOREIGN KEY (`Cargo_cbo`)
+    REFERENCES `FarmaciaTADS036M`.`Cargo` (`cbo`)
+    ON DELETE CASCADE
+    ON UPDATE CASCADE,
+  CONSTRAINT `fk_Funcionario_has_Cargo_Departamento1`
+    FOREIGN KEY (`Departamento_idDepartamento`)
+    REFERENCES `FarmaciaTADS036M`.`Departamento` (`idDepartamento`)
+    ON DELETE CASCADE
+    ON UPDATE RESTRICT)
+ENGINE = InnoDB
+DEFAULT CHARACTER SET = utf8mb3;
+
+-- ALTER TABLE
+alter table cliente
+	add column idade int null;
+    
+alter table cliente
+	add column pontuacao int null;
+
+SET SQL_MODE=@OLD_SQL_MODE;
+SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;
+SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS;
+
+
+select * from funcionario;
+
+select cpf, nome, sexo, dataNasc, estadoCivil, email, ch, salario, comissao, dataAdm 
+	from funcionario;
+
+select cpf as "CPF", nome "Funcionário", sexo "Gênero", dataNasc "Data de Nascimento", 
+	estadoCivil "Estado Civil", email "E-mail", ch "Carga-horária", salario "Salário", 
+    comissao "Comissão", dataAdm "Data de Admissão" 
+	from funcionario;
+    
+select cpf as "CPF", nome "Funcionário", sexo "Gênero", dataNasc "Data de Nascimento", 
+	estadoCivil "Estado Civil", email "E-mail", ch "Carga-horária", salario "Salário", 
+    comissao "Comissão", dataAdm "Data de Admissão" 
+	from funcionario
+		order by nome desc;
+        
+select cpf as "CPF", nome "Funcionário", sexo "Gênero", dataNasc "Data de Nascimento", 
+	estadoCivil "Estado Civil", email "E-mail", ch "Carga-horária", salario "Salário", 
+    comissao "Comissão", dataAdm "Data de Admissão" 
+	from funcionario
+		where sexo = 'F'
+			order by nome;        
+        
+select cpf as "CPF", nome "Funcionário", sexo "Gênero", dataNasc "Data de Nascimento", 
+	estadoCivil "Estado Civil", email "E-mail", ch "Carga-horária", salario "Salário", 
+    comissao "Comissão", dataAdm "Data de Admissão" 
+	from funcionario
+		where salario >= 3000 and
+			sexo = 'M'
+			order by nome;        
+        
+select cpf as "CPF", nome "Funcionário", sexo "Gênero", dataNasc "Data de Nascimento", 
+	estadoCivil "Estado Civil", email "E-mail", ch "Carga-horária", salario "Salário", 
+    comissao "Comissão", dataAdm "Data de Admissão" 
+	from funcionario
+		where dataAdm < '2020-03-04'
+			order by nome;        
+        
+select cpf as "CPF", nome "Funcionário", sexo "Gênero", dataNasc "Data de Nascimento", 
+	estadoCivil "Estado Civil", email "E-mail", ch "Carga-horária", salario "Salário", 
+    comissao "Comissão", dataAdm "Data de Admissão" 
+	from funcionario
+		where dataAdm >= '2020-06-01' and
+			dataAdm <= '2022-06-30'
+			order by nome;          
+        
+select cpf as "CPF", nome "Funcionário", sexo "Gênero", dataNasc "Data de Nascimento", 
+	estadoCivil "Estado Civil", email "E-mail", ch "Carga-horária", salario "Salário", 
+    comissao "Comissão", dataAdm "Data de Admissão" 
+	from funcionario
+		where dataAdm between '2020-06-01' and '2022-06-30'
+			order by nome;        
+        
+select cpf as "CPF", nome "Funcionário", sexo "Gênero", dataNasc "Data de Nascimento", 
+	estadoCivil "Estado Civil", email "E-mail", ch "Carga-horária", salario "Salário", 
+    comissao "Comissão", dataAdm "Data de Admissão" 
+	from funcionario
+		where salario between 4000 and 5000
+			order by nome;          
+
+select cpf as "CPF", nome "Funcionário", sexo "Gênero", dataNasc "Data de Nascimento", 
+	estadoCivil "Estado Civil", email "E-mail", ch "Carga-horária", salario "Salário", 
+    comissao "Comissão", dataAdm "Data de Admissão" 
+	from funcionario
+		where nome like "%Costa"
+			order by nome;    
+            
+            
+select cpf as "CPF", nome "Funcionário", sexo "Gênero", dataNasc "Data de Nascimento", 
+	estadoCivil "Estado Civil", email "E-mail", ch "Carga-horária", salario "Salário", 
+    comissao "Comissão", dataAdm "Data de Admissão" 
+	from funcionario
+		where nome like "Ana%"
+			order by nome;  
+            
+select cpf as "CPF", nome "Funcionário", sexo "Gênero", dataNasc "Data de Nascimento", 
+	estadoCivil "Estado Civil", email "E-mail", ch "Carga-horária", salario "Salário", 
+    comissao "Comissão", dataAdm "Data de Admissão" 
+	from funcionario
+		where nome like "%Ana%"
+			order by nome;
+            
+select cpf as "CPF", nome "Funcionário", sexo "Gênero", dataNasc "Data de Nascimento", 
+	estadoCivil "Estado Civil", email "E-mail", ch "Carga-horária", salario "Salário", 
+    comissao "Comissão", dataAdm "Data de Admissão" 
+	from funcionario
+		where nome like "%Costa" or
+			nome like "%Silva" or
+            nome like "%Oliveira"
+			order by nome;
+            
+select cpf as "CPF", upper(nome) "Funcionário", sexo "Gênero", 
+	date_format(dataNasc, '%d/%m/%Y') "Data de Nascimento", 
+	estadoCivil "Estado Civil", email "E-mail", concat(ch, 'h') "Carga-horária", 
+    concat('R$ ', format(salario, 2, 'de_DE')) "Salário", 
+    concat('R$ ', format(comissao, 2, 'de_DE')) "Comissão", 
+    concat('R$ ', format(salario + comissao, 2, 'de_DE')) "Salário Final",
+    date_format(dataAdm, '%H:%i - %d/%m/%Y') "Data de Admissão" 
+	from funcionario
+		order by salario+comissao desc;
+
+select cpf as "CPF", upper(nome) "Funcionário", sexo "Gênero", 
+	date_format(dataNasc, '%d/%m/%Y') "Data de Nascimento", 
+	estadoCivil "Estado Civil", email "E-mail", concat(ch, 'h') "Carga-horária", 
+    concat('R$ ', format(salario, 2, 'de_DE')) "Salário", 
+    concat('R$ ', format(comissao, 2, 'de_DE')) "Comissão", 
+    concat('R$ ', format(salario + comissao, 2, 'de_DE')) "Salário Final",
+    date_format(dataAdm, '%H:%i - %d/%m/%Y') "Data de Admissão" 
+	from funcionario
+		where salario >= avg(salario)
+			order by nome;
+
+select avg(salario) from funcionario;
+
+select max(salario) from funcionario;
+
+select min(salario) from funcionario;
+
+select cpf as "CPF", upper(nome) "Funcionário", sexo "Gênero", 
+	date_format(dataNasc, '%d/%m/%Y') "Data de Nascimento", 
+	estadoCivil "Estado Civil", email "E-mail", concat(ch, 'h') "Carga-horária", 
+    concat('R$ ', format(salario, 2, 'de_DE')) "Salário", 
+    concat('R$ ', format(comissao, 2, 'de_DE')) "Comissão", 
+    concat('R$ ', format(salario + comissao, 2, 'de_DE')) "Salário Final",
+    date_format(dataAdm, '%H:%i - %d/%m/%Y') "Data de Admissão" 
+	from funcionario
+		where salario >= (select avg(salario) from funcionario)
+			order by nome;
+
+select cpf as "CPF", upper(nome) "Funcionário", sexo "Gênero", 
+	date_format(dataNasc, '%d/%m/%Y') "Data de Nascimento", 
+	estadoCivil "Estado Civil", email "E-mail", concat(ch, 'h') "Carga-horária", 
+    concat('R$ ', format(salario, 2, 'de_DE')) "Salário", 
+    concat('R$ ', format(comissao, 2, 'de_DE')) "Comissão", 
+    concat('R$ ', format(salario + comissao, 2, 'de_DE')) "Salário Final",
+    date_format(dataAdm, '%H:%i - %d/%m/%Y') "Data de Admissão" 
+	from funcionario
+		where salario = (select max(salario) from funcionario)
+			order by nome;
+
+select cpf as "CPF", upper(nome) "Funcionário", sexo "Gênero", 
+	date_format(dataNasc, '%d/%m/%Y') "Data de Nascimento", 
+	estadoCivil "Estado Civil", email "E-mail", concat(ch, 'h') "Carga-horária", 
+    concat('R$ ', format(salario, 2, 'de_DE')) "Salário", 
+    concat('R$ ', format(comissao, 2, 'de_DE')) "Comissão", 
+    concat('R$ ', format(salario + comissao, 2, 'de_DE')) "Salário Final",
+    date_format(dataAdm, '%H:%i - %d/%m/%Y') "Data de Admissão" 
+	from funcionario
+		where salario = (select min(salario) from funcionario)
+			order by nome;
+
+select cpf as "CPF", upper(nome) "Funcionário", sexo "Gênero", 
+	date_format(dataNasc, '%d/%m/%Y') "Data de Nascimento", 
+	estadoCivil "Estado Civil", email "E-mail", concat(ch, 'h') "Carga-horária", 
+    concat('R$ ', format(salario, 2, 'de_DE')) "Salário", 
+    concat('R$ ', format(comissao, 2, 'de_DE')) "Comissão", 
+    concat('R$ ', format(salario + comissao, 2, 'de_DE')) "Salário Final",
+    date_format(dataAdm, '%H:%i - %d/%m/%Y') "Data de Admissão" 
+	from funcionario
+		where dataNasc = (select max(dataNasc) from funcionario)
+			order by nome;
+
+select cpf as "CPF", upper(nome) "Funcionário", sexo "Gênero", 
+	date_format(dataNasc, '%d/%m/%Y') "Data de Nascimento", 
+    timestampdiff(year, dataNasc, now()) "Idade",
+	estadoCivil "Estado Civil", email "E-mail", concat(ch, 'h') "Carga-horária", 
+    concat('R$ ', format(salario, 2, 'de_DE')) "Salário", 
+    concat('R$ ', format(comissao, 2, 'de_DE')) "Comissão", 
+    concat('R$ ', format(salario + comissao, 2, 'de_DE')) "Salário Final",
+    date_format(dataAdm, '%H:%i - %d/%m/%Y') "Data de Admissão" 
+	from funcionario
+		order by nome;
+
+select cpf as "CPF", upper(nome) "Funcionário", sexo "Gênero", 
+	date_format(dataNasc, '%d/%m/%Y') "Data de Nascimento", 
+    timestampdiff(year, dataNasc, now()) "Idade",
+	estadoCivil "Estado Civil", email "E-mail", concat(ch, 'h') "Carga-horária", 
+    concat('R$ ', format(salario, 2, 'de_DE')) "Salário", 
+    concat('R$ ', format(comissao, 2, 'de_DE')) "Comissão", 
+    concat('R$ ', format(salario + comissao, 2, 'de_DE')) "Salário Final",
+    date_format(dataAdm, '%H:%i - %d/%m/%Y') "Data de Admissão" 
+	from funcionario
+		where timestampdiff(year, dataNasc, now()) = 
+			(select max(timestampdiff(year, dataNasc, now())) from funcionario)
+			order by nome;
+            
+select cpf as "CPF", upper(nome) "Funcionário", sexo "Gênero", 
+	date_format(dataNasc, '%d/%m/%Y') "Data de Nascimento", 
+    timestampdiff(year, dataNasc, now()) "Idade",
+	estadoCivil "Estado Civil", email "E-mail", concat(ch, 'h') "Carga-horária", 
+    concat('R$ ', format(salario, 2, 'de_DE')) "Salário", 
+    concat('R$ ', format(comissao, 2, 'de_DE')) "Comissão", 
+    concat('R$ ', format(salario + comissao, 2, 'de_DE')) "Salário Final",
+    date_format(dataAdm, '%H:%i - %d/%m/%Y') "Data de Admissão" 
+	from funcionario
+		where cpf in (select funcionario_cpf from dependente)
+			order by nome;
+            
+select funcionario_cpf from dependente;
+            
+select cpf as "CPF", upper(nome) "Funcionário", sexo "Gênero", 
+	date_format(dataNasc, '%d/%m/%Y') "Data de Nascimento", 
+    timestampdiff(year, dataNasc, now()) "Idade",
+	estadoCivil "Estado Civil", email "E-mail", concat(ch, 'h') "Carga-horária", 
+    concat('R$ ', format(salario, 2, 'de_DE')) "Salário", 
+    concat('R$ ', format(comissao, 2, 'de_DE')) "Comissão", 
+    concat('R$ ', format(salario + comissao, 2, 'de_DE')) "Salário Final",
+    date_format(dataAdm, '%H:%i - %d/%m/%Y') "Data de Admissão" 
+	from funcionario
+		where cpf in (select funcionario_cpf from enderecoFunc 
+							where cidade like "Olinda")
+			order by nome;
+            
+select funcionario_cpf from enderecoFunc where cidade like "Olinda";            
+
+select cpf as "CPF", upper(nome) "Funcionário", sexo "Gênero", 
+	date_format(dataNasc, '%d/%m/%Y') "Data de Nascimento", 
+    timestampdiff(year, dataNasc, now()) "Idade",
+	estadoCivil "Estado Civil", email "E-mail", concat(ch, 'h') "Carga-horária", 
+    concat('R$ ', format(salario, 2, 'de_DE')) "Salário", 
+    concat('R$ ', format(comissao, 2, 'de_DE')) "Comissão", 
+    concat('R$ ', format(salario + comissao, 2, 'de_DE')) "Salário Final",
+    date_format(dataAdm, '%H:%i - %d/%m/%Y') "Data de Admissão",
+    bairro "Bairro", cidade "Cidade"
+	from funcionario, enderecoFunc
+		order by nome;
+        
+select cpf as "CPF", upper(nome) "Funcionário", sexo "Gênero", 
+	date_format(dataNasc, '%d/%m/%Y') "Data de Nascimento", 
+    timestampdiff(year, dataNasc, now()) "Idade",
+	estadoCivil "Estado Civil", email "E-mail", concat(ch, 'h') "Carga-horária", 
+    concat('R$ ', format(salario, 2, 'de_DE')) "Salário", 
+    concat('R$ ', format(comissao, 2, 'de_DE')) "Comissão", 
+    concat('R$ ', format(salario + comissao, 2, 'de_DE')) "Salário Final",
+    date_format(dataAdm, '%H:%i - %d/%m/%Y') "Data de Admissão",
+    bairro "Bairro", cidade "Cidade"
+	from funcionario, enderecoFunc
+		where cpf = funcionario_cpf
+			order by nome;
+
+select cpf as "CPF", upper(nome) "Funcionário", sexo "Gênero", 
+	date_format(dataNasc, '%d/%m/%Y') "Data de Nascimento", 
+    timestampdiff(year, dataNasc, now()) "Idade",
+	estadoCivil "Estado Civil", email "E-mail", concat(ch, 'h') "Carga-horária", 
+    concat('R$ ', format(salario, 2, 'de_DE')) "Salário", 
+    concat('R$ ', format(comissao, 2, 'de_DE')) "Comissão", 
+    concat('R$ ', format(salario + comissao, 2, 'de_DE')) "Salário Final",
+    date_format(dataAdm, '%H:%i - %d/%m/%Y') "Data de Admissão",
+    bairro "Bairro", cidade "Cidade"
+	from funcionario
+		join enderecoFunc on cpf = funcionario_cpf
+			order by nome;
+            
+select cpf as "CPF", upper(nome) "Funcionário", sexo "Gênero", 
+	date_format(dataNasc, '%d/%m/%Y') "Data de Nascimento", 
+    timestampdiff(year, dataNasc, now()) "Idade",
+	estadoCivil "Estado Civil", email "E-mail", concat(ch, 'h') "Carga-horária", 
+    concat('R$ ', format(salario, 2, 'de_DE')) "Salário", 
+    concat('R$ ', format(comissao, 2, 'de_DE')) "Comissão", 
+    concat('R$ ', format(salario + comissao, 2, 'de_DE')) "Salário Final",
+    date_format(dataAdm, '%H:%i - %d/%m/%Y') "Data de Admissão",
+    bairro "Bairro", cidade "Cidade"
+	from funcionario
+		inner join enderecoFunc on cpf = funcionario_cpf
+			order by nome;            
+
+select dep.cpf "CPF do Dependente", dep.nome "Dependente", 
+	timestampdiff(year, dep.dataNasc, now()) "Idade do Dependente",
+    dep.parentesco "Parentesco", func.nome "Responsável"
+	from dependente dep
+		inner join funcionario func on func.cpf = dep.funcionario_cpf
+			order by func.nome;
+
+select func.cpf "CPF", func.nome "Funcionario", 
+	count(dep.cpf) "Quantidade de Dependentes"
+    from funcionario func
+		inner join dependente dep on dep.funcionario_cpf = func.cpf
+			group by func.cpf
+				order by func.nome;
+
+select func.cpf "CPF", func.nome "Funcionario", 
+	count(dep.cpf) "Quantidade de Dependentes"
+    from funcionario func
+		left join dependente dep on dep.funcionario_cpf = func.cpf
+			group by func.cpf
+				order by func.nome;
+
+select upper(func.nome) "Funcionário", func.cpf as "CPF", func.sexo "Gênero", 
+	date_format(func.dataNasc, '%d/%m/%Y') "Data de Nascimento", 
+    timestampdiff(year, func.dataNasc, now()) "Idade",
+	func.estadoCivil "Estado Civil", func.email "E-mail", concat(func.ch, 'h') "Carga-horária", 
+    concat('R$ ', format(func.salario, 2, 'de_DE')) "Salário", 
+    concat('R$ ', format(func.comissao, 2, 'de_DE')) "Comissão", 
+    concat('R$ ', format(func.salario + func.comissao, 2, 'de_DE')) "Salário Final",
+    date_format(func.dataAdm, '%H:%i - %d/%m/%Y') "Data de Admissão", 
+    dep.nome "Departamento", tel.numero "Número de Telefone"
+	from funcionario func
+		inner join trabalhar trb on trb.Funcionario_cpf = func.cpf
+        inner join departamento dep on dep.idDepartamento = trb.Departamento_idDepartamento
+        left join telefone tel on tel.Funcionario_cpf = func.cpf
+			where dataAdm between '2020-06-01' and '2022-06-30'
+				order by func.nome;        
+
+create view RelatorioFunc as
+	select upper(func.nome) "Funcionário", func.cpf as "CPF", func.sexo "Gênero", 
+		date_format(func.dataNasc, '%d/%m/%Y') "Data de Nascimento", 
+		timestampdiff(year, func.dataNasc, now()) "Idade",
+		func.estadoCivil "Estado Civil", func.email "E-mail", concat(func.ch, 'h') "Carga-horária", 
+		concat('R$ ', format(func.salario, 2, 'de_DE')) "Salário", 
+		concat('R$ ', format(func.comissao, 2, 'de_DE')) "Comissão", 
+		concat('R$ ', format(func.salario + func.comissao, 2, 'de_DE')) "Salário Final",
+		date_format(func.dataAdm, '%H:%i - %d/%m/%Y') "Data de Admissão", 
+		dep.nome "Departamento", tel.numero "Número de Telefone"
+		from funcionario func
+			inner join trabalhar trb on trb.Funcionario_cpf = func.cpf
+			inner join departamento dep on dep.idDepartamento = trb.Departamento_idDepartamento
+			left join telefone tel on tel.Funcionario_cpf = func.cpf
+				order by func.nome;
+
+drop view relatoriofunc;
+
+select * from relatoriofunc;
+
+select * from relatoriofunc
+	where `Gênero` = 'f';
+
+select * from relatoriofunc
+	where Departamento like "Frente%";
+
+select dep.nome "Departamento", 
+	count(trb.Funcionario_cpf) "Quantidade de Funcionários", 
+    concat("R$ ", format(avg(func.salario), 2, 'de_DE')) "Média Salarial",
+    concat("R$ ", format(avg(func.comissao), 2, 'de_DE')) "Média das Comissões",
+    concat("R$ ", format(sum(func.salario + func.comissao), 2, 'de_DE')) "Investimento com Funcionário",
+	coalesce(grt.nome, "Não tem") "Gerente"
+	from departamento dep
+		inner join trabalhar trb on trb.Departamento_idDepartamento = dep.idDepartamento
+        inner join funcionario func on func.cpf = trb.Funcionario_cpf
+        left join funcionario grt on grt.cpf = dep.Gerente_cpf
+			group by trb.Departamento_idDepartamento
+				order by dep.nome;
+
+-- "Data da Venda", "Valor Pago", "Cliente", "Vendedor"
+select date_format(vnd.dataVenda, '%d/%m/%Y - %H:%i') "Data da Venda",
+	concat("R$ ", format(vnd.valorTotal - coalesce(vnd.desconto, 0), 2, 'de_DE')) "Valor Pago",
+    cli.nome "Cliente",
+    func.nome "Vendedor"
+	from venda vnd
+		inner join cliente cli on cli.cpf = vnd.Cliente_cpf
+        inner join funcionario func on func.cpf = vnd.Funcionario_cpf
+			order by vnd.dataVenda;
+
+select func.nome "Vendedor", 
+	count(vnd.idVenda) "Quantidade de Vendas",
+	concat("R$ ", format(sum(vnd.valorTotal - coalesce(vnd.desconto, 0)), 2, 'de_DE')) "Faturamento"
+	from venda vnd
+        inner join funcionario func on func.cpf = vnd.Funcionario_cpf
+			group by func.cpf
+				order by sum(vnd.valorTotal - coalesce(vnd.desconto, 0)) desc;
+
+select func.nome "Vendedor", 
+	count(vnd.idVenda) "Quantidade de Vendas",
+	concat("R$ ", format(sum(vnd.valorTotal - coalesce(vnd.desconto, 0)), 2, 'de_DE')) "Faturamento"
+	from venda vnd
+        inner join funcionario func on func.cpf = vnd.Funcionario_cpf
+			where vnd.dataVenda between '2021-01-01' and '2021-03-31'
+				group by func.cpf
+					order by sum(vnd.valorTotal - coalesce(vnd.desconto, 0)) desc;
+
+select coalesce(endC.cidade, "Não informado") "Cidade", 
+	coalesce(endC.bairro, "Não informado") "Bairro", 
+	count(vnd.idVenda) "Quantidade de Vendas",
+	concat("R$ ", format(sum(vnd.valorTotal - coalesce(vnd.desconto, 0)), 2, 'de_DE')) "Faturamento"
+	from venda vnd
+        inner join cliente cli on cli.cpf = vnd.Cliente_cpf
+        left join enderecocli endC on endC.Cliente_cpf = cli.cpf
+			group by endC.cidade, endC.bairro
+				order by sum(vnd.valorTotal - coalesce(vnd.desconto, 0)) desc;
+
+select prod.nome "Produto", count(ivndProd.Venda_idVenda) "Frequência em Vendas" 
+	from itensvendaprod ivndProd
+		inner join produto prod on prod.idProduto = ivndProd.Produto_idProduto
+			group by ivndProd.Produto_idProduto
+				order by count(ivndProd.Venda_idVenda) desc
+					limit 10;
+
+select prod.nome "Produto", count(ivndProd.Venda_idVenda) "Frequência em Vendas",
+	sum(ivndProd.quantidade) "Quantidade Vendida", 
+    concat("R$ ", format(sum(ivndProd.quantidade*ivndProd.valorDeVenda), 2, 'de_DE')) "Faturamento por Produto"
+	from itensvendaprod ivndProd
+		inner join produto prod on prod.idProduto = ivndProd.Produto_idProduto
+			group by ivndProd.Produto_idProduto
+				order by sum(ivndProd.quantidade) desc
+					limit 10;
+
+select prod.nome "Produto", count(ivndProd.Venda_idVenda) "Frequência em Vendas",
+	sum(ivndProd.quantidade) "Quantidade Vendida", 
+    concat("R$ ", format(sum(ivndProd.quantidade*ivndProd.valorDeVenda), 2, 'de_DE')) "Faturamento por Produto"
+	from itensvendaprod ivndProd
+		inner join produto prod on prod.idProduto = ivndProd.Produto_idProduto
+			group by ivndProd.Produto_idProduto
+				order by sum(ivndProd.quantidade*ivndProd.valorDeVenda) desc
+					limit 10;
+ 
+select tipo "Tipo", count(Venda_idVenda) "Participação em Vendas",
+	concat("R$ ", format(sum(valorPago), 2, 'de_DE')) "Total R$"
+	from formapag
+		group by tipo
+			order by sum(valorPago) desc;
+
+select srv.nome "Serviço", count(ivndSrv.Venda_idVenda) "Frequência em Vendas",
+	sum(ivndSrv.quantidade) "Quantidade Vendida", 
+    concat("R$ ", format(sum(ivndSrv.quantidade*ivndSrv.valorVenda), 2, 'de_DE')) "Faturamento por Produto"
+	from itensvendaservico ivndSrv
+		inner join servico srv on srv.idServico = ivndSrv.Servico_idServico
+			group by ivndSrv.Servico_idServico
+				order by sum(ivndSrv.quantidade*ivndSrv.valorVenda) desc
+					limit 10;
+
+-- cpf funcionario salario(sb) comissao aux alimentacao(550) aux saude(idade) aux escola(180*filho<=6) inss irrf salario liquido
+
+select func.cpf "CPF", upper(func.nome) "Funcionário",
+	concat("R$ ", format(func.salario), 2, 'de_DE') "Salário Bruto",
+	concat("R$ ", format(func.comissao), 2, 'de_DE') "Comissão",
+    concat("R$ ", format(550, 2, 'de_DE')) "Auxílio Alimentação",
+    timestampdiff(year, func.dataNasc, now()) "Idade",
+    concat("R$ ", format(calcAuxSaude(func.dataNasc), 2, 'de_DE')) "Auxílio Saúde"
+		from funcionario func
+			order by func.nome;
+
+delimiter $$ 
+create function calcAuxSaude(dn date)
+returns decimal(6,2) deterministic
+begin
+	declare idade int;
+    declare auxSaude decimal (6,2) default 0.0;
+    select timestampdiff(year, dn, now()) into idade;
+    if idade <= 25 then set auxSaude = 250;
+		elseif idade >= 26 and idade <= 35 then set auxSaude = 350;
+        elseif idade >= 36 and idade <= 45 then set auxSaude = 450;
+        else set auxSaude = 550;
+	end if;
+    return auxSaude;
+end $$
+delimiter ;
+            
